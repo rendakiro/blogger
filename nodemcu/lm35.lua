@@ -16,8 +16,6 @@ function Temperatura()
 end
 
 function conectar(HOST)
--- Le damos un tiempo para pillar IP
-
         if wifi.sta.status() == 5 then
             print("Conectado IP: " .. wifi.sta.getip())
             tmr.alarm(0, 600000, 1, function()
