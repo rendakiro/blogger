@@ -29,7 +29,7 @@ function conectar(SSID, PASSWORD, HOST)
             end)
         else
             print("Error de Conexion")
-            tmr.alarm(0, 60000, 1, function() conectar(HOST) end)
+            tmr.alarm(0, 60000, 1, function() conectar(SSID, PASSWORD, HOST) end)
         end
 
 end
