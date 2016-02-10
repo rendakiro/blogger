@@ -1,21 +1,22 @@
 --- Configuracion
-SSID       = "SSID_NAME"
-PASSWORD   = "PASS"
+SSID       = "SSID"
+PASSWORD   = "PASSWORD"
 HOST       = "api.thingspeak.com"
 
 -- Cuerpo
-wifi.setmode(wifi.STATION)
-wifi.sta.config(SSID, PASSWORD)
-conectar(HOST)
+conectar(SSID, PASSWORD, HOST)
 
  -- Funciones
 function Temperatura()
     local r = adc.read(0)
-    local c = r * 285 / 1024
+      local c = r * 285 / 1024
     return c
 end
 
-function conectar(HOST)
+function conectar(SSID, PASSWORD, HOST)
+        wifi.setmode(wifi.STATION)
+        wifi.sta.config(SSID, PASSWORD)
+        
         if wifi.sta.status() == 5 then
             print("Conectado IP: " .. wifi.sta.getip())
             tmr.alarm(0, 600000, 1, function()
@@ -38,15 +39,15 @@ function generar_datos(HOST)
 
     temperatura = Temperatura()
     host = wifi.sta.getip()
-    print("Temperatura"..temperatura.." C\n")
+    print("Temperatura"..temperatura.."C\n")
 
 -- Preparamos el POST
     data_post = "api_key="..API_KEY.."&field1="..temperatura
 
     print(data_post)
 
-    cabecera_post = "POST https://..HOST../update HTTP/1.1\r\n"..
-     "Host: "..host.."\r\n"..
+    cabecera_post = "POST https://"..HOST.."/update HTTP/1.1\r\n"..
+     "Host: "..HOST.."\r\n"..
      "Connection: close\r\n"..
      "Content-Type: application/x-www-form-urlencoded\r\n"..
      "Content-Length: "..string.len(data_post).."\r\n"..
