@@ -3,9 +3,6 @@ SSID       = "ssid"
 PASSWORD   = "password"
 HOST       = "api.thingspeak.com"
 
--- Cuerpo
-conectar(SSID, PASSWORD, HOST)
-
  -- Funciones
 function Temperatura()
     local r = adc.read(0)
@@ -14,34 +11,40 @@ function Temperatura()
 end
 
 function conectar(SSID, PASSWORD, HOST)
-        wifi.setmode(wifi.STATION)
-        wifi.sta.config(SSID, PASSWORD)
+        if wifi.sta.status() ~= 5 then
+            wifi.setmode(wifi.STATION)
+            wifi.sta.config(SSID, PASSWORD)
+        end
 
         if wifi.sta.status() == 5 then
             print("Conectado IP: " .. wifi.sta.getip())
-            tmr.alarm(0, 600000, 1, function()
-                socket = net.createConnection(net.TCP,0)
+
+            socket = net.createConnection(net.TCP,0)
                 socket:connect(80,HOST)
                 socket:on("connection",function(sck)
                 local post_request = generar_datos(HOST)
                 sck:send(post_request)
-                end)
+                 print("POST OK") 
+                end)           
+                        
+            tmr.alarm(0, 600000, 1, function()
+                print("RESET")
             end)
         else
             print("Error de Conexion")
-            tmr.alarm(0, 60000, 1, function() conectar(SSID, PASSWORD, HOST) end)
+            tmr.alarm(0, 6000, 0, function() conectar(SSID, PASSWORD, HOST) end)
         end
 end
 
 function generar_datos(HOST)
-    API_KEY = "api_key"
+    API_KEY = 'api key'
 
-    temperatura = Temperatura()
+    int_temperatura = Temperatura()
     YO = wifi.sta.getip()
-    print("Temperatura"..temperatura.."C\n")
+    print("Temperatura"..int_temperatura.." C\n")
 
 -- Preparamos el POST
-    data_post = "api_key="..API_KEY.."&field1="..temperatura
+    data_post = "api_key="..API_KEY.."&field1="..int_temperatura..""
 -- Lanzamos el POST
     cabecera_post = "POST https://"..HOST.."/update HTTP/1.1\r\n"..
      "Host: "..YO.."\r\n"..
@@ -52,3 +55,8 @@ function generar_datos(HOST)
 
      return cabecera_post
 end
+
+-- Cuerpo
+tmr.alarm(0, 1000, 1, function() 
+    conectar(SSID, PASSWORD, HOST)
+end )
