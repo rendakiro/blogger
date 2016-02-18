@@ -17,27 +17,26 @@ function conectar(SSID, PASSWORD, HOST)
         end
 
         if wifi.sta.status() == 5 then
-            print("Conectado IP: " .. wifi.sta.getip())
-
-            socket = net.createConnection(net.TCP,0)
+            print("Conectado IP: " .. wifi.sta.getip())           
+                        
+            tmr.alarm(0, 60000, 1, function()
+             socket = net.createConnection(net.TCP,0)
                 socket:connect(80,HOST)
                 socket:on("connection",function(sck)
                 local post_request = generar_datos(HOST)
                 sck:send(post_request)
                  print("POST OK") 
-                end)           
-                        
-            tmr.alarm(0, 600000, 1, function()
+                end)
                 print("RESET")
             end)
         else
             print("Error de Conexion")
-            tmr.alarm(0, 6000, 0, function() conectar(SSID, PASSWORD, HOST) end)
+            tmr.alarm(0, 6000, 1, function() conectar(SSID, PASSWORD, HOST) end)
         end
 end
 
 function generar_datos(HOST)
-    API_KEY = 'api key'
+    API_KEY = 'api_key'
 
     int_temperatura = Temperatura()
     YO = wifi.sta.getip()
@@ -57,6 +56,4 @@ function generar_datos(HOST)
 end
 
 -- Cuerpo
-tmr.alarm(0, 1000, 1, function() 
-    conectar(SSID, PASSWORD, HOST)
-end )
+conectar(SSID, PASSWORD, HOST)
